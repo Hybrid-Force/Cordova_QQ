@@ -130,6 +130,25 @@ NSString *QQ_LOGIN_NETWORK_ERROR = @"QQ login network error";
 }
 
 /**
+ *  发送图片到QQ
+ *  @param command CDVInvokedUrlCommand
+ */
+- (void)sendImageToQQ:(CDVInvokedUrlCommand *)command {
+    self.callback = command.callbackId;
+    NSDictionary *args = [command.arguments objectAtIndex:0];
+    if (args) {
+        QQApiImageObject *imgObj = [self makeImageObject:args];
+        SendMessageToQQReq *req = [SendMessageToQQReq reqWithContent:imgObj];
+        QQApiSendResultCode sent = [QQApiInterface sendReq:req];
+        [self handleSendResult:sent];
+    }
+    else {
+        CDVPluginResult *pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:QQ_PARAM_NOT_FOUND];
+        [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
+    }
+}
+
+/**
  *  创建要分享的新闻类
  *
  *  @param args      新闻类所需要的参数
@@ -156,6 +175,24 @@ NSString *QQ_LOGIN_NETWORK_ERROR = @"QQ login network error";
               description:[args objectForKey:@"description"]
           previewImageURL:[NSURL URLWithString:previewImageUrl]];
     return newsObj;
+}
+
+/**
+ *  创建要分享的图片实例
+ *  @param args 图片需要的参数
+ *  @return QQApiImageObject
+ */
+- (QQApiImageObject *)makeImageObject:(NSDictionary *)args {
+    if (!args) {
+        return nil;
+    }
+    NSString *base64string = [args objectForKey:@"imageData"];
+    NSData *imgData = [[NSData alloc] initWithBase64EncodedString:base64string options:0];
+    QQApiImageObject *imgObj = [QQApiImageObject objectWithData:imgData
+                                               previewImageData:imgData
+                                                          title:[args objectForKey:@"title"]
+                                                    description:[args objectForKey:@"description"]];
+    return imgObj;
 }
 
 /**

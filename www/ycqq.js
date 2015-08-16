@@ -74,7 +74,23 @@ module.exports = {
 	},
 	checkClientInstalled:function(successCallback, errorCallback){
 		exec(successCallback, errorCallback, "YCQQ", "checkClientInstalled", []);
+	},
+	sendImageToQQ: function(successCallback, errorCallback, args) {
+		if (args === null || args === undefined) {
+			args = {};
+		}
+		if (args.imageData === null || args.imageData === undefined) {
+			args.imageData = "";
+		}
+		if(args.title == null || args.title == undefined){
+			args.title = "";
+		}
+		if(args.description == null || args.description == undefined){
+			args.description = "";
+		}
+		if(args.appName == null || args.appName == undefined){
+			args.appName = "";
+		}
+		exec(successCallback, errorCallback, "YCQQ", "sendImageToQQ", [args]);
 	}
-
 };
-

@@ -20,6 +20,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.io.File;
+import java.io.FileOutputStream;
 
 public class YCQQ extends CordovaPlugin {
 
@@ -39,6 +41,7 @@ public class YCQQ extends CordovaPlugin {
     private static final String QQ_Client_NOT_INSYALLED_ERROR = "QQ client is not installed";
     private static final String TITLIE_IS_EMPTY = "share title is empty";
     private static final String URL_IS_EMPTY = "share url is empty";
+    private static final String IO_ERROR = "IO error";
 
     @Override
     protected void pluginInitialize() {
@@ -68,6 +71,9 @@ public class YCQQ extends CordovaPlugin {
         }
         if (action.equalsIgnoreCase("addToQQFavorites")) {
             return addToQQFavorites(args, callbackContext);
+        }
+        if (action.equalsIgnoreCase("sendImageToQQ")) {
+            return sendImageToQQ(args, callbackContext);
         }
         return super.execute(action, args, callbackContext);
     }
@@ -236,6 +242,70 @@ public class YCQQ extends CordovaPlugin {
                         addToQQFavoritesListener);
             }
         });
+        return true;
+    }
+
+    /**
+     * 发送图片到QQ
+     *
+     * @param args
+     * @param callbackContext
+     * @return
+     * @throws JSONException
+     */
+    private boolean sendImageToQQ(JSONArray args, CallbackContext callbackContext) throws JSONException {
+        currentCallbackContext = callbackContext;
+        JSONObject json = args.getJSONObject(0);
+        if (json == null || json.length() == 0) {
+            callbackContext.error(QQ_PARAM_ERROR);
+            return false;
+        } else {
+            if (!json.has("imageData")) {
+                callbackContext.error(QQ_PARAM_ERROR);
+                return false;
+            }
+        }
+
+        // Check external storage writable
+        String state = android.os.Environment.getExternalStorageState();
+        if (!android.os.Environment.MEDIA_MOUNTED.equals(state)) {
+            callbackContext.error(IO_ERROR);
+            return false;
+        }
+        // Create temp file for sharing to qq
+        String imageLocalUrl;
+        try {
+            String base64ImageData = json.getString("imageData");
+            byte[] decodedString = android.util.Base64.decode(base64ImageData, android.util.Base64.DEFAULT);
+            File outputFile = new File(cordova.getActivity().getExternalCacheDir(), ".qqshareimage");
+            FileOutputStream fos = new FileOutputStream(outputFile);
+            fos.write(decodedString);
+            fos.close();
+            imageLocalUrl = outputFile.getAbsolutePath();
+        } catch (Exception e) {
+            callbackContext.error(IO_ERROR);
+            return false;
+        }
+
+
+        final Bundle params = new Bundle();
+        params.putInt(QQShare.SHARE_TO_QQ_KEY_TYPE,
+                QQShare.SHARE_TO_QQ_TYPE_IMAGE);
+        params.putString(QQShare.SHARE_TO_QQ_IMAGE_LOCAL_URL, imageLocalUrl);
+        if (json.has("appName") && !json.getString("appName").equalsIgnoreCase("")) {
+            params.putString(QQShare.SHARE_TO_QQ_APP_NAME, json.getString("appName"));
+        }
+        this.cordova.setActivityResultCallback(this);
+        this.cordova.getActivity().runOnUiThread(new Runnable() {
+
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                mTencent.shareToQQ(YCQQ.this.cordova.getActivity(), params,
+                        qqShareListener);
+            }
+        });
+
         return true;
     }
 

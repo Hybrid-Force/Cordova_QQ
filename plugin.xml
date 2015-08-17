@@ -11,9 +11,9 @@
   <keywords>cordova,qq</keywords>
   <repo>https://github.com/iVanPan/Cordova_QQ</repo>
   <issue>https://github.com/iVanPan/Cordova_QQ/issues</issue>
-  
+
   <preference name="QQ_APP_ID" />
-  
+
   <!--require cordova version -->
   <engines>
     <engine name="cordova" version=">=3.5.0" />
@@ -79,10 +79,9 @@
       安装完插件，请用XCode打开工程，查看URL Types里面QQ的URL type有没有，如果没有请手动添加/after installing this plugin,check the URL Types in your Xcode project.If you don't find URL Types for qqsdk，manually add it.
     </info>
   </platform>
-    
+
   <!-- android -->
   <platform name="android">
-    <hook type="before_plugin_install" src="scripts/android/android-hook.js" />
     <config-file target="res/xml/config.xml" parent="/*">
       <feature name="YCQQ" >
         <param name="android-package" value="org.zy.yuancheng.qq.YCQQ"/>
@@ -102,7 +101,7 @@
   <!--permission for QQ SDK -->
   <config-file target="AndroidManifest.xml" parent="/manifest">
       <uses-permission android:name="android.permission.INTERNET" />
-      <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> 
+      <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     </config-file>
   <!--QQ webview Auth Activity -->
   <config-file target="AndroidManifest.xml" parent="/manifest/application">
@@ -127,7 +126,6 @@
   <source-file src="src/android/YCQQ.java" target-dir="src/org/zy/yuancheng/qq" />
   <!--QQ SDK version 2.9.1-->
   <source-file src="src/android/open_sdk_r5043.jar" target-dir="libs/" />
-    <source-file src="src/android/mta-sdk-1.6.2.jar" target-dir="libs/" />
-  <source-file src="src/android/android-support-v4.jar" target-dir="libs/" />
+  <source-file src="src/android/mta-sdk-1.6.2.jar" target-dir="libs/" />
   </platform>
 </plugin>
